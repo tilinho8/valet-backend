@@ -165,6 +165,7 @@
       <div><div class="field-label">License Plate</div><input id="f-plate" placeholder="ABC 1234" style="text-transform:uppercase;letter-spacing:0.1em"/></div>
       <div><div class="field-label">Ticket #</div><input id="f-ticket" placeholder="002266"/></div>
       <div><div class="field-label">Location</div><input id="f-location" placeholder="Spot / level"/></div>
+      <div><div class="field-label">Date &amp; Time In</div><input id="f-timein" placeholder="Auto-filled"/></div>
       <div class="field-full"><div class="field-label">Notes</div><input id="f-notes" placeholder="Additional notes"/></div>
     </div>
     <div class="form-actions">
@@ -320,6 +321,10 @@ function populateForm(d) {
   document.getElementById("f-ticket").value = d.ticketNumber || "";
   document.getElementById("f-location").value = d.location || "";
   document.getElementById("f-notes").value = d.notes || "";
+  const now = new Date();
+  const dateStr = now.toLocaleDateString([], {month:"2-digit",day:"2-digit",year:"numeric"});
+  const timeStr = now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  document.getElementById("f-timein").value = dateStr + " " + timeStr;
   document.getElementById("form-ticket-num").textContent = d.ticketNumber ? "#" + d.ticketNumber : "";
   document.getElementById("form-card").style.display = "block";
   document.getElementById("form-card").scrollIntoView({ behavior:"smooth" });
@@ -340,6 +345,7 @@ function saveTicket() {
     licensePlate: document.getElementById("f-plate").value,
     location: document.getElementById("f-location").value,
     notes: document.getElementById("f-notes").value,
+    timeIn: document.getElementById("f-timein").value,
     at: new Date().toLocaleTimeString()
   };
   tickets.unshift(t);
@@ -365,7 +371,7 @@ function renderLog() {
       <span class="ticket-num-col">#${t.ticketNumber||"—"}</span>
       <div class="ticket-info">
         <div class="ticket-main">${t.guestName||"Guest"} · ${[t.make,t.model].filter(Boolean).join(" ")||"Unknown"}</div>
-        <div class="ticket-sub">${t.licensePlate||"No plate"} · ${t.color||"—"} · ${t.at}</div>
+        <div class="ticket-sub">${t.licensePlate||"No plate"} · ${t.color||"—"} · ${t.timeIn||t.at}</div>
       </div>
       <div class="color-dot" style="background:${COLOR_MAP[t.color]||"#444"}"></div>
       <button class="del-btn" onclick="deleteTicket(${i})">✕</button>
@@ -380,9 +386,9 @@ function deleteTicket(i) {
 }
 
 function exportCSV() {
-  const h = ["Ticket #","Guest","Make","Model","Color","Plate","Location","Notes","Time"];
+  const h = ["Ticket #","Guest","Make","Model","Color","Plate","Location","Date & Time In","Notes","Saved"];
   const rows = tickets.map(t =>
-    [t.ticketNumber,t.guestName,t.make,t.model,t.color,t.licensePlate,t.location,t.notes,t.at]
+    [t.ticketNumber,t.guestName,t.make,t.model,t.color,t.licensePlate,t.location,t.timeIn,t.notes,t.at]
       .map(v => '"' + (v||"").replace(/"/g,'""') + '"').join(",")
   );
   const a = document.createElement("a");
