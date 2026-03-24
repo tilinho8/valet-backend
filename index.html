@@ -77,6 +77,9 @@
   .ticket-main { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ticket-sub { font-size:10px; color:#444460; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .color-dot { width:10px; height:10px; border-radius:50%; border:1px solid #fff2; flex-shrink:0; }
+  .search-wrap { padding:12px 20px; border-bottom:1px solid #181828; }
+  .search-input { width:100%; background:#08080f; border:1px solid #252535; border-radius:8px; padding:9px 12px; color:#eeeef5; font-size:12px; font-family:inherit; outline:none; }
+  .search-input:focus { border-color:#f5a623; box-shadow:0 0 0 3px #f5a62318; }
   .del-btn { width:26px; height:26px; border-radius:6px; background:transparent; border:1px solid #252535; color:#444460; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 </style>
 </head>
@@ -180,7 +183,8 @@
       <span class="section-label" id="log-title">Ticket Log</span>
       <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
     </div>
-    <div id="log-rows"></div>
+    <div class="search-wrap"><input class="search-input" id="search-input" placeholder="🔍  Search by name, plate, make, ticket #..." oninput="renderLog()"/></div>
+  <div id="log-rows"></div>
   </div>
 </main>
 
@@ -365,8 +369,15 @@ function renderLog() {
   const rows = document.getElementById("log-rows");
   if (tickets.length === 0) { log.style.display = "none"; return; }
   log.style.display = "block";
-  document.getElementById("log-title").textContent = "Ticket Log — " + tickets.length + " total";
-  rows.innerHTML = tickets.map((t,i) => `
+  const q = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const filtered = tickets.filter(t =>
+    [t.guestName, t.licensePlate, t.make, t.model, t.ticketNumber, t.color, t.location]
+      .some(v => (v||"").toLowerCase().includes(q))
+  );
+  document.getElementById("log-title").textContent = q
+    ? filtered.length + " of " + tickets.length + " tickets"
+    : "Ticket Log — " + tickets.length + " total";
+  rows.innerHTML = filtered.map((t) => { const i = tickets.indexOf(t); return `
     <div class="ticket-row">
       <span class="ticket-num-col">#${t.ticketNumber||"—"}</span>
       <div class="ticket-info">
@@ -376,7 +387,7 @@ function renderLog() {
       <div class="color-dot" style="background:${COLOR_MAP[t.color]||"#444"}"></div>
       <button class="del-btn" onclick="deleteTicket(${i})">✕</button>
     </div>
-  `).join("");
+  `; }).join("");
 }
 
 function deleteTicket(i) {
