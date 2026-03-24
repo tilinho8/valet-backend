@@ -1,8 +1,18 @@
 const express = require("express");
 const cors = require("cors");
+
 const app = express();
-app.use(cors());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
+
 app.use(express.json({ limit: "20mb" }));
+
 app.post("/scan", async (req, res) => {
   try {
     const { imageBase64, mimeType } = req.body;
@@ -32,5 +42,6 @@ app.post("/scan", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 app.get("/", (req, res) => res.send("Valet Scanner API running"));
 app.listen(process.env.PORT || 3001, () => console.log("Server running"));
