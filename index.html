@@ -77,6 +77,11 @@
   .ticket-main { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ticket-sub { font-size:10px; color:#444460; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .color-dot { width:10px; height:10px; border-radius:50%; border:1px solid #fff2; flex-shrink:0; }
+  .filter-bar { padding:10px 20px; border-bottom:1px solid #181828; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .filter-select { background:#08080f; border:1px solid #252535; border-radius:8px; padding:7px 10px; color:#eeeef5; font-size:11px; font-family:inherit; outline:none; appearance:none; cursor:pointer; flex:1; min-width:120px; }
+  .filter-select:focus { border-color:#f5a623; }
+  .filter-reset { padding:7px 12px; background:transparent; border:1px solid #252535; border-radius:8px; color:#555570; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .filter-reset:hover { border-color:#f5a623; color:#f5a623; }
   .search-wrap { padding:12px 20px; border-bottom:1px solid #181828; }
   .search-input { width:100%; background:#08080f; border:1px solid #252535; border-radius:8px; padding:9px 12px; color:#eeeef5; font-size:12px; font-family:inherit; outline:none; }
   .search-input:focus { border-color:#f5a623; box-shadow:0 0 0 3px #f5a62318; }
@@ -183,7 +188,43 @@
       <span class="section-label" id="log-title">Ticket Log</span>
       <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
     </div>
-    <div class="search-wrap"><input class="search-input" id="search-input" placeholder="🔍  Search by name, plate, make, ticket #..." oninput="renderLog()"/></div>
+    <div class="filter-bar">
+    <select class="filter-select" id="filter-make" onchange="renderLog()">
+      <option value="">All Makes</option>
+      <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option><option>Audi</option>
+      <option>Bentley</option><option>BMW</option><option>Buick</option><option>Cadillac</option>
+      <option>Chevrolet</option><option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
+      <option>Ford</option><option>Genesis</option><option>GMC</option><option>Honda</option>
+      <option>Hyundai</option><option>Infiniti</option><option>Jaguar</option><option>Jeep</option>
+      <option>Kia</option><option>Lamborghini</option><option>Land Rover</option><option>Lexus</option>
+      <option>Lincoln</option><option>Lucid</option><option>Maserati</option><option>Mazda</option>
+      <option>McLaren</option><option>Mercedes-Benz</option><option>MINI</option><option>Mitsubishi</option>
+      <option>Nissan</option><option>Polestar</option><option>Porsche</option><option>RAM</option>
+      <option>Rivian</option><option>Rolls-Royce</option><option>Subaru</option><option>Tesla</option>
+      <option>Toyota</option><option>Volkswagen</option><option>Volvo</option><option>Other</option>
+    </select>
+    <select class="filter-select" id="filter-color" onchange="renderLog()">
+      <option value="">All Colors</option>
+      <option>Black</option><option>White</option><option>Silver</option><option>Gray</option>
+      <option>Red</option><option>Blue</option><option>Green</option><option>Gold</option>
+      <option>Beige</option><option>Brown</option><option>Orange</option><option>Yellow</option>
+      <option>Purple</option><option>Other</option>
+    </select>
+    <select class="filter-select" id="filter-location" onchange="renderLog()">
+      <option value="">All Locations</option>
+    </select>
+    <select class="filter-select" id="filter-date" onchange="renderLog()">
+      <option value="">All Dates</option>
+    </select>
+    <select class="filter-select" id="sort-by" onchange="renderLog()">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="name">Guest Name A-Z</option>
+      <option value="ticket">Ticket # Order</option>
+    </select>
+    <button class="filter-reset" onclick="resetFilters()">✕ Reset</button>
+  </div>
+  <div class="search-wrap"><input class="search-input" id="search-input" placeholder="🔍  Search by name, plate, make, ticket #..." oninput="renderLog()"/></div>
   <div id="log-rows"></div>
   </div>
 </main>
@@ -364,19 +405,67 @@ function updateBadge() {
   document.getElementById("badge").textContent = tickets.length + (tickets.length === 1 ? " ticket" : " tickets");
 }
 
+function updateLocationFilter() {
+  const sel = document.getElementById("filter-location");
+  const current = sel.value;
+  const locations = [...new Set(tickets.map(t => t.location).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All Locations</option>' + locations.map(l => `<option>${l}</option>`).join("");
+  if (locations.includes(current)) sel.value = current;
+}
+
+function updateDateFilter() {
+  const sel = document.getElementById("filter-date");
+  const current = sel.value;
+  const dates = [...new Set(tickets.map(t => t.timeIn ? t.timeIn.split(" ")[0] : "").filter(Boolean))].sort().reverse();
+  sel.innerHTML = '<option value="">All Dates</option>' + dates.map(d => `<option>${d}</option>`).join("");
+  if (dates.includes(current)) sel.value = current;
+}
+
+function resetFilters() {
+  document.getElementById("filter-make").value = "";
+  document.getElementById("filter-color").value = "";
+  document.getElementById("filter-location").value = "";
+  document.getElementById("filter-date").value = "";
+  document.getElementById("sort-by").value = "newest";
+  document.getElementById("search-input").value = "";
+  renderLog();
+}
+
 function renderLog() {
   const log = document.getElementById("log-card");
   const rows = document.getElementById("log-rows");
   if (tickets.length === 0) { log.style.display = "none"; return; }
   log.style.display = "block";
+  updateLocationFilter();
+  updateDateFilter();
+
   const q = (document.getElementById("search-input")?.value || "").toLowerCase();
-  const filtered = tickets.filter(t =>
-    [t.guestName, t.licensePlate, t.make, t.model, t.ticketNumber, t.color, t.location]
-      .some(v => (v||"").toLowerCase().includes(q))
-  );
-  document.getElementById("log-title").textContent = q
+  const fMake = document.getElementById("filter-make")?.value || "";
+  const fColor = document.getElementById("filter-color")?.value || "";
+  const fLocation = document.getElementById("filter-location")?.value || "";
+  const fDate = document.getElementById("filter-date")?.value || "";
+  const sortBy = document.getElementById("sort-by")?.value || "newest";
+
+  let filtered = tickets.filter(t => {
+    const matchSearch = !q || [t.guestName, t.licensePlate, t.make, t.model, t.ticketNumber, t.color, t.location].some(v => (v||"").toLowerCase().includes(q));
+    const matchMake = !fMake || t.make === fMake;
+    const matchColor = !fColor || t.color === fColor;
+    const matchLocation = !fLocation || t.location === fLocation;
+    const matchDate = !fDate || (t.timeIn || "").startsWith(fDate);
+    return matchSearch && matchMake && matchColor && matchLocation && matchDate;
+  });
+
+  filtered = [...filtered].sort((a, b) => {
+    if (sortBy === "oldest") return tickets.indexOf(b) - tickets.indexOf(a);
+    if (sortBy === "name") return (a.guestName||"").localeCompare(b.guestName||"");
+    if (sortBy === "ticket") return (a.ticketNumber||"").localeCompare(b.ticketNumber||"");
+    return tickets.indexOf(a) - tickets.indexOf(b); // newest
+  });
+
+  document.getElementById("log-title").textContent = q || fMake || fColor || fLocation || fDate
     ? filtered.length + " of " + tickets.length + " tickets"
     : "Ticket Log — " + tickets.length + " total";
+
   rows.innerHTML = filtered.map((t) => { const i = tickets.indexOf(t); return `
     <div class="ticket-row">
       <span class="ticket-num-col">#${t.ticketNumber||"—"}</span>
