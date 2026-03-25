@@ -5,107 +5,96 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Valet Scanner</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #08080f; color: #eeeef5; font-family: 'DM Mono', 'Courier New', monospace; min-height: 100vh; }
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background:#08080f; color:#eeeef5; font-family:'DM Mono','Courier New',monospace; min-height:100vh; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
-  header { background:#10101a; border-bottom:1px solid #1e1e2e; padding:15px 22px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:50; }
-  .logo { width:36px; height:36px; background:linear-gradient(135deg,#f5a623,#e0820a); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 0 18px #f5a62335; flex-shrink:0; }
-  .header-title { font-size:14px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; }
-  .header-sub { font-size:10px; color:#555570; letter-spacing:0.12em; text-transform:uppercase; }
-  .badge { background:#f5a62316; border:1px solid #f5a62340; border-radius:20px; padding:4px 13px; font-size:11px; color:#f5a623; margin-left:auto; }
+header { background:#10101a; border-bottom:1px solid #1e1e2e; padding:15px 22px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:50; }
+.logo { width:36px; height:36px; background:linear-gradient(135deg,#f5a623,#e0820a); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 0 18px #f5a62335; flex-shrink:0; }
+.header-title { font-size:14px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; }
+.header-sub { font-size:10px; color:#555570; letter-spacing:0.12em; text-transform:uppercase; }
+.badge { background:#f5a62316; border:1px solid #f5a62340; border-radius:20px; padding:4px 13px; font-size:11px; color:#f5a623; margin-left:auto; }
 
-  main { max-width:540px; margin:0 auto; padding:26px 18px 80px; }
+main { max-width:540px; margin:0 auto; padding:26px 18px 80px; }
 
-  .status { padding:11px 15px; border-radius:10px; margin-bottom:18px; font-size:12px; display:flex; align-items:center; gap:8px; animation:up 0.2s ease; word-break:break-word; }
-  .status.err { background:#ef444418; border:1px solid #ef444455; color:#ef4444; }
-  .status.ok { background:#22c55e18; border:1px solid #22c55e55; color:#22c55e; }
+.status { padding:11px 15px; border-radius:10px; margin-bottom:18px; font-size:12px; display:flex; align-items:center; gap:8px; animation:up 0.2s ease; word-break:break-word; }
+.status.err { background:#ef444418; border:1px solid #ef444455; color:#ef4444; }
+.status.ok { background:#22c55e18; border:1px solid #22c55e55; color:#22c55e; }
 
-  .card { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; overflow:hidden; margin-bottom:22px; }
-  .card-inner { padding:20px 20px 0; }
-  .section-label { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:#444460; margin-bottom:14px; }
+.card { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; overflow:hidden; margin-bottom:22px; }
+.card-inner { padding:20px 20px 0; }
+.section-label { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:#444460; margin-bottom:14px; }
 
-  .drop-zone { border:2px dashed #242436; border-radius:12px; padding:36px 20px; display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; transition:all 0.2s; position:relative; text-align:center; }
-  .drop-zone.drag { border-color:#f5a623; background:#f5a62308; }
-  .drop-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
-  .drop-icon { font-size:32px; }
-  .drop-text { font-size:13px; color:#8888a0; line-height:1.6; }
-  .drop-accent { color:#f5a623; font-weight:600; }
+.drop-zone { border:2px dashed #242436; border-radius:12px; padding:36px 20px; display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; transition:all 0.2s; position:relative; text-align:center; }
+.drop-zone.drag { border-color:#f5a623; background:#f5a62308; }
+.drop-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.drop-icon { font-size:32px; }
+.drop-text { font-size:13px; color:#8888a0; line-height:1.6; }
+.drop-accent { color:#f5a623; font-weight:600; }
 
-  .preview-wrap { position:relative; }
-  .preview-wrap img { width:100%; border-radius:10px; display:block; max-height:340px; object-fit:contain; background:#000; }
-  .clear-btn { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; background:#000c; border:1px solid #fff2; color:#fff; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.preview-wrap { position:relative; }
+.preview-wrap img { width:100%; border-radius:10px; display:block; max-height:340px; object-fit:contain; background:#000; }
+.clear-btn { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; background:#000c; border:1px solid #fff2; color:#fff; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 
-  .divider { display:flex; align-items:center; gap:12px; margin:14px 0; }
-  .divider-line { flex:1; height:1px; background:#1a1a28; }
-  .divider-text { font-size:10px; color:#2a2a40; letter-spacing:0.14em; text-transform:uppercase; }
+.divider { display:flex; align-items:center; gap:12px; margin:14px 0; }
+.divider-line { flex:1; height:1px; background:#1a1a28; }
+.divider-text { font-size:10px; color:#2a2a40; letter-spacing:0.14em; text-transform:uppercase; }
 
-  .cam-btn { width:100%; padding:12px; background:transparent; border:1px solid #242436; border-radius:10px; color:#7777a0; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; transition:all 0.2s; }
-  .cam-btn.active { background:#f5a62318; border-color:#f5a62388; color:#f5a623; }
+.cam-btn { width:100%; padding:12px; background:transparent; border:1px solid #242436; border-radius:10px; color:#7777a0; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; transition:all 0.2s; }
+.cam-btn.active { background:#f5a62318; border-color:#f5a62388; color:#f5a623; }
 
-  .video-wrap { position:relative; margin-top:12px; border-radius:10px; overflow:hidden; background:#000; }
-  video { width:100%; display:block; max-height:280px; object-fit:cover; }
-  .capture-btn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); width:56px; height:56px; border-radius:50%; background:#f5a623; border:4px solid #fff3; cursor:pointer; font-size:22px; box-shadow:0 0 24px #f5a62360; display:flex; align-items:center; justify-content:center; }
+.video-wrap { position:relative; margin-top:12px; border-radius:10px; overflow:hidden; background:#000; }
+video { width:100%; display:block; max-height:280px; object-fit:cover; }
+.capture-btn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); width:56px; height:56px; border-radius:50%; background:#f5a623; border:4px solid #fff3; cursor:pointer; font-size:22px; box-shadow:0 0 24px #f5a62360; display:flex; align-items:center; justify-content:center; }
 
-  .card-bottom { padding:16px 20px 20px; }
-  .scan-btn { width:100%; padding:14px; background:#1a1a28; border:none; border-radius:10px; color:#444460; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; cursor:not-allowed; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; }
-  .scan-btn.ready { background:linear-gradient(135deg,#f5a623,#e0820a); color:#000; cursor:pointer; box-shadow:0 4px 18px #f5a62338; }
+.card-bottom { padding:16px 20px 20px; }
+.scan-btn { width:100%; padding:14px; background:#1a1a28; border:none; border-radius:10px; color:#444460; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; cursor:not-allowed; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; }
+.scan-btn.ready { background:linear-gradient(135deg,#f5a623,#e0820a); color:#000; cursor:pointer; box-shadow:0 4px 18px #f5a62338; }
 
-  .spinner { display:inline-block; width:13px; height:13px; border:2px solid #33334a; border-top-color:#f5a623; border-radius:50%; animation:spin 0.7s linear infinite; }
+.spinner { display:inline-block; width:13px; height:13px; border:2px solid #33334a; border-top-color:#f5a623; border-radius:50%; animation:spin 0.7s linear infinite; }
 
-  .form-card { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; padding:20px; margin-bottom:22px; animation:up 0.3s ease; }
-  .form-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
-  .ticket-num { font-size:13px; color:#f5a623; font-weight:700; }
-  .field-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .field-full { grid-column:1/-1; }
-  .field-label { font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:#444460; margin-bottom:5px; }
-  input, select { width:100%; background:#08080f; border:1px solid #252535; border-radius:8px; padding:10px 11px; color:#eeeef5; font-size:13px; font-family:inherit; outline:none; appearance:none; }
-  input:focus, select:focus { border-color:#f5a623; box-shadow:0 0 0 3px #f5a62318; }
-  select option { background:#0d0d18; }
-  .form-actions { display:flex; gap:10px; margin-top:18px; }
-  .btn-discard { padding:12px 16px; background:transparent; border:1px solid #252535; border-radius:10px; color:#555570; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:inherit; }
-  .btn-save { flex:1; padding:12px; background:linear-gradient(135deg,#f5a623,#e0820a); border:none; border-radius:10px; color:#000; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; font-family:inherit; box-shadow:0 4px 16px #f5a62335; }
+.form-card { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; padding:20px; margin-bottom:22px; animation:up 0.3s ease; }
+.form-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.ticket-num { font-size:13px; color:#f5a623; font-weight:700; }
+.field-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field-full { grid-column:1/-1; }
+.field-label { font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:#444460; margin-bottom:5px; }
+input, select { width:100%; background:#08080f; border:1px solid #252535; border-radius:8px; padding:10px 11px; color:#eeeef5; font-size:13px; font-family:inherit; outline:none; appearance:none; }
+input:focus, select:focus { border-color:#f5a623; box-shadow:0 0 0 3px #f5a62318; }
+select option { background:#0d0d18; }
+.form-actions { display:flex; gap:10px; margin-top:18px; }
+.btn-discard { padding:12px 16px; background:transparent; border:1px solid #252535; border-radius:10px; color:#555570; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:inherit; }
+.btn-save { flex:1; padding:12px; background:linear-gradient(135deg,#f5a623,#e0820a); border:none; border-radius:10px; color:#000; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; font-family:inherit; box-shadow:0 4px 16px #f5a62335; }
 
-  .log-card { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; overflow:hidden; animation:up 0.3s ease; }
-  .log-header { padding:14px 20px; border-bottom:1px solid #181828; display:flex; align-items:center; justify-content:space-between; }
-  .export-btn { padding:5px 13px; background:transparent; border:1px solid #252535; border-radius:20px; color:#7777a0; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:inherit; }
-  .ticket-row { padding:13px 20px; border-bottom:1px solid #121220; display:flex; align-items:center; gap:12px; }
-  .ticket-num-col { font-size:11px; color:#f5a623; font-weight:700; min-width:64px; flex-shrink:0; }
-  .ticket-info { flex:1; min-width:0; }
-  .ticket-main { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .ticket-sub { font-size:10px; color:#444460; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .color-dot { width:10px; height:10px; border-radius:50%; border:1px solid #fff2; flex-shrink:0; }
-  .filter-bar { padding:10px 20px; border-bottom:1px solid #181828; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  .filter-select { background:#08080f; border:1px solid #252535; border-radius:8px; padding:7px 10px; color:#eeeef5; font-size:11px; font-family:inherit; outline:none; appearance:none; cursor:pointer; flex:1; min-width:120px; }
-  .filter-select:focus { border-color:#f5a623; }
-  .filter-reset { padding:7px 12px; background:transparent; border:1px solid #252535; border-radius:8px; color:#555570; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:inherit; white-space:nowrap; }
-  .filter-reset:hover { border-color:#f5a623; color:#f5a623; }
-  .search-wrap { padding:12px 20px; border-bottom:1px solid #181828; }
-  .search-input { width:100%; background:#08080f; border:1px solid #252535; border-radius:8px; padding:9px 12px; color:#eeeef5; font-size:12px; font-family:inherit; outline:none; }
-  .search-input:focus { border-color:#f5a623; box-shadow:0 0 0 3px #f5a62318; }
-  .del-btn { width:26px; height:26px; border-radius:6px; background:transparent; border:1px solid #252535; color:#444460; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .modal-overlay { display:none; position:fixed; inset:0; background:#000a; z-index:100; align-items:center; justify-content:center; padding:20px; }
-  .modal-overlay.open { display:flex; }
-  .modal { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; animation:up 0.25s ease; }
-  .modal-header { padding:16px 20px; border-bottom:1px solid #1e1e2e; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#10101a; z-index:10; }
-  .modal-title { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#f5a623; font-weight:700; }
-  .modal-close { width:30px; height:30px; border-radius:50%; background:transparent; border:1px solid #252535; color:#eeeef5; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .modal-body { padding:20px; }
-  .modal-actions { display:flex; gap:10px; margin-top:18px; padding:0 20px 20px; }
-  .ticket-row { cursor:pointer; transition:background 0.15s; }
-  .ticket-row:hover { background:#14141e; }
-  .modal-overlay { display:none; position:fixed; inset:0; background:#000a; z-index:100; align-items:center; justify-content:center; padding:20px; }
-  .modal-overlay.open { display:flex; }
-  .modal { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; animation:up 0.25s ease; }
-  .modal-header { padding:16px 20px; border-bottom:1px solid #1e1e2e; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#10101a; z-index:10; }
-  .modal-title { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#f5a623; font-weight:700; }
-  .modal-close { width:30px; height:30px; border-radius:50%; background:transparent; border:1px solid #252535; color:#eeeef5; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .modal-body { padding:20px; }
-  .modal-actions { display:flex; gap:10px; margin-top:18px; padding:0 20px 20px; }
-  .ticket-row { cursor:pointer; transition:background 0.15s; }
-  .ticket-row:hover { background:#14141e; }
+.log-card { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; overflow:hidden; animation:up 0.3s ease; }
+.log-header { padding:14px 20px; border-bottom:1px solid #181828; display:flex; align-items:center; justify-content:space-between; }
+.export-btn { padding:5px 13px; background:transparent; border:1px solid #252535; border-radius:20px; color:#7777a0; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:inherit; }
+.filter-bar { padding:10px 20px; border-bottom:1px solid #181828; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.filter-select { background:#08080f; border:1px solid #252535; border-radius:8px; padding:7px 10px; color:#eeeef5; font-size:11px; font-family:inherit; outline:none; appearance:none; cursor:pointer; flex:1; min-width:120px; }
+.filter-select:focus { border-color:#f5a623; }
+.filter-reset { padding:7px 12px; background:transparent; border:1px solid #252535; border-radius:8px; color:#555570; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.search-wrap { padding:12px 20px; border-bottom:1px solid #181828; }
+.search-input { width:100%; background:#08080f; border:1px solid #252535; border-radius:8px; padding:9px 12px; color:#eeeef5; font-size:12px; font-family:inherit; outline:none; appearance:none; }
+.search-input:focus { border-color:#f5a623; box-shadow:0 0 0 3px #f5a62318; }
+.ticket-row { padding:13px 20px; border-bottom:1px solid #121220; display:flex; align-items:center; gap:12px; cursor:pointer; transition:background 0.15s; }
+.ticket-row:hover { background:#14141e; }
+.ticket-num-col { font-size:11px; color:#f5a623; font-weight:700; min-width:64px; flex-shrink:0; }
+.ticket-info { flex:1; min-width:0; }
+.ticket-main { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ticket-sub { font-size:10px; color:#444460; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.color-dot { width:10px; height:10px; border-radius:50%; border:1px solid #fff2; flex-shrink:0; }
+.del-btn { width:26px; height:26px; border-radius:6px; background:transparent; border:1px solid #252535; color:#444460; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+.modal-overlay { display:none; position:fixed; inset:0; background:#000a; z-index:100; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; animation:up 0.25s ease; }
+.modal-header { padding:16px 20px; border-bottom:1px solid #1e1e2e; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#10101a; z-index:10; }
+.modal-title { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#f5a623; font-weight:700; }
+.modal-close { width:30px; height:30px; border-radius:50%; background:transparent; border:1px solid #252535; color:#eeeef5; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.modal-body { padding:20px; }
+.modal-actions { display:flex; gap:10px; padding:0 20px 20px; }
 </style>
 </head>
 <body>
@@ -122,7 +111,6 @@
 <main>
   <div id="status-wrap"></div>
 
-  <!-- Scanner Card -->
   <div class="card">
     <div class="card-inner">
       <div class="section-label">Scan Ticket</div>
@@ -154,7 +142,6 @@
     </div>
   </div>
 
-  <!-- Form -->
   <div class="form-card" id="form-card" style="display:none">
     <div class="form-header">
       <span class="section-label">Confirm Ticket Info</span>
@@ -162,10 +149,8 @@
     </div>
     <div class="field-grid">
       <div class="field-full"><div class="field-label">Guest Name</div><input id="f-name" placeholder="Guest name"/></div>
-      <div>
-        <div class="field-label">Make</div>
-        <select id="f-make">
-          <option value="">— Select —</option>
+      <div><div class="field-label">Make</div>
+        <select id="f-make"><option value="">— Select —</option>
           <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option><option>Audi</option>
           <option>Bentley</option><option>BMW</option><option>Buick</option><option>Cadillac</option>
           <option>Chevrolet</option><option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
@@ -180,10 +165,8 @@
         </select>
       </div>
       <div><div class="field-label">Model</div><input id="f-model" placeholder="e.g. Camry"/></div>
-      <div>
-        <div class="field-label">Color</div>
-        <select id="f-color">
-          <option value="">— Select —</option>
+      <div><div class="field-label">Color</div>
+        <select id="f-color"><option value="">— Select —</option>
           <option>Black</option><option>White</option><option>Silver</option><option>Gray</option>
           <option>Red</option><option>Blue</option><option>Green</option><option>Gold</option>
           <option>Beige</option><option>Brown</option><option>Orange</option><option>Yellow</option>
@@ -193,7 +176,7 @@
       <div><div class="field-label">License Plate</div><input id="f-plate" placeholder="ABC 1234" style="text-transform:uppercase;letter-spacing:0.1em"/></div>
       <div><div class="field-label">Ticket #</div><input id="f-ticket" placeholder="002266"/></div>
       <div><div class="field-label">Location</div><input id="f-location" placeholder="Spot / level"/></div>
-      <div><div class="field-label">Date &amp; Time In</div><input id="f-timein" placeholder="Auto-filled" readonly style="opacity:0.5;cursor:not-allowed;"/></div>
+      <div><div class="field-label">Date &amp; Time In</div><input id="f-timein" readonly style="opacity:0.5;cursor:not-allowed;"/></div>
       <div class="field-full"><div class="field-label">Notes</div><input id="f-notes" placeholder="Additional notes"/></div>
     </div>
     <div class="form-actions">
@@ -202,66 +185,65 @@
     </div>
   </div>
 
-  <!-- Log -->
   <div class="log-card" id="log-card" style="display:none">
     <div class="log-header">
       <span class="section-label" id="log-title">Ticket Log</span>
       <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
     </div>
     <div class="filter-bar">
-    <select class="filter-select" id="filter-make" onchange="renderLog()">
-      <option value="">All Makes</option>
-      <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option><option>Audi</option>
-      <option>Bentley</option><option>BMW</option><option>Buick</option><option>Cadillac</option>
-      <option>Chevrolet</option><option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
-      <option>Ford</option><option>Genesis</option><option>GMC</option><option>Honda</option>
-      <option>Hyundai</option><option>Infiniti</option><option>Jaguar</option><option>Jeep</option>
-      <option>Kia</option><option>Lamborghini</option><option>Land Rover</option><option>Lexus</option>
-      <option>Lincoln</option><option>Lucid</option><option>Maserati</option><option>Mazda</option>
-      <option>McLaren</option><option>Mercedes-Benz</option><option>MINI</option><option>Mitsubishi</option>
-      <option>Nissan</option><option>Polestar</option><option>Porsche</option><option>RAM</option>
-      <option>Rivian</option><option>Rolls-Royce</option><option>Subaru</option><option>Tesla</option>
-      <option>Toyota</option><option>Volkswagen</option><option>Volvo</option><option>Other</option>
-    </select>
-    <select class="filter-select" id="filter-color" onchange="renderLog()">
-      <option value="">All Colors</option>
-      <option>Black</option><option>White</option><option>Silver</option><option>Gray</option>
-      <option>Red</option><option>Blue</option><option>Green</option><option>Gold</option>
-      <option>Beige</option><option>Brown</option><option>Orange</option><option>Yellow</option>
-      <option>Purple</option><option>Other</option>
-    </select>
-    <select class="filter-select" id="filter-location" onchange="renderLog()">
-      <option value="">All Locations</option>
-    </select>
-    <select class="filter-select" id="filter-date" onchange="renderLog()">
-      <option value="">All Dates</option>
-    </select>
-    <select class="filter-select" id="sort-by" onchange="renderLog()">
-      <option value="newest">Newest First</option>
-      <option value="oldest">Oldest First</option>
-      <option value="name">Guest Name A-Z</option>
-      <option value="ticket">Ticket # Order</option>
-    </select>
-    <button class="filter-reset" onclick="resetFilters()">✕ Reset</button>
-  </div>
-  <div class="search-wrap"><input class="search-input" id="search-input" placeholder="🔍  Search by name, plate, make, ticket #..." oninput="renderLog()"/></div>
-  <div id="log-rows"></div>
+      <select class="filter-select" id="filter-make" onchange="renderLog()">
+        <option value="">All Makes</option>
+        <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option><option>Audi</option>
+        <option>Bentley</option><option>BMW</option><option>Buick</option><option>Cadillac</option>
+        <option>Chevrolet</option><option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
+        <option>Ford</option><option>Genesis</option><option>GMC</option><option>Honda</option>
+        <option>Hyundai</option><option>Infiniti</option><option>Jaguar</option><option>Jeep</option>
+        <option>Kia</option><option>Lamborghini</option><option>Land Rover</option><option>Lexus</option>
+        <option>Lincoln</option><option>Lucid</option><option>Maserati</option><option>Mazda</option>
+        <option>McLaren</option><option>Mercedes-Benz</option><option>MINI</option><option>Mitsubishi</option>
+        <option>Nissan</option><option>Polestar</option><option>Porsche</option><option>RAM</option>
+        <option>Rivian</option><option>Rolls-Royce</option><option>Subaru</option><option>Tesla</option>
+        <option>Toyota</option><option>Volkswagen</option><option>Volvo</option><option>Other</option>
+      </select>
+      <select class="filter-select" id="filter-color" onchange="renderLog()">
+        <option value="">All Colors</option>
+        <option>Black</option><option>White</option><option>Silver</option><option>Gray</option>
+        <option>Red</option><option>Blue</option><option>Green</option><option>Gold</option>
+        <option>Beige</option><option>Brown</option><option>Orange</option><option>Yellow</option>
+        <option>Purple</option><option>Other</option>
+      </select>
+      <select class="filter-select" id="filter-location" onchange="renderLog()">
+        <option value="">All Locations</option>
+      </select>
+      <select class="filter-select" id="filter-date" onchange="renderLog()">
+        <option value="">All Dates</option>
+      </select>
+      <select class="filter-select" id="sort-by" onchange="renderLog()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="name">Guest Name A-Z</option>
+        <option value="ticket">Ticket # Order</option>
+      </select>
+      <button class="filter-reset" onclick="resetFilters()">✕ Reset</button>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" id="search-input" placeholder="🔍  Search by name, plate, make, ticket #..." oninput="renderLog()"/>
+    </div>
+    <div id="log-rows"></div>
   </div>
 </main>
 
-<!-- Ticket Detail Modal -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title" id="modal-title">Ticket Detail</span>
-      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="field-grid">
         <div class="field-full"><div class="field-label">Guest Name</div><input id="m-name" placeholder="Guest name"/></div>
         <div><div class="field-label">Make</div>
-          <select id="m-make">
-            <option value="">— Select —</option>
+          <select id="m-make"><option value="">— Select —</option>
             <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option><option>Audi</option>
             <option>Bentley</option><option>BMW</option><option>Buick</option><option>Cadillac</option>
             <option>Chevrolet</option><option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
@@ -277,8 +259,7 @@
         </div>
         <div><div class="field-label">Model</div><input id="m-model" placeholder="e.g. Camry"/></div>
         <div><div class="field-label">Color</div>
-          <select id="m-color">
-            <option value="">— Select —</option>
+          <select id="m-color"><option value="">— Select —</option>
             <option>Black</option><option>White</option><option>Silver</option><option>Gray</option>
             <option>Red</option><option>Blue</option><option>Green</option><option>Gold</option>
             <option>Beige</option><option>Brown</option><option>Orange</option><option>Yellow</option>
@@ -293,79 +274,26 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-discard" onclick="closeModalBtn()">Cancel</button>
-      <button class="btn-save" onclick="saveModal()">✓ Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- Ticket Detail Modal -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="modal-title">Ticket Detail</span>
-      <button class="modal-close" onclick="closeModalBtn()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="field-grid">
-        <div class="field-full"><div class="field-label">Guest Name</div><input id="m-name" placeholder="Guest name"/></div>
-        <div><div class="field-label">Make</div>
-          <select id="m-make">
-            <option value="">— Select —</option>
-            <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option><option>Audi</option>
-            <option>Bentley</option><option>BMW</option><option>Buick</option><option>Cadillac</option>
-            <option>Chevrolet</option><option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
-            <option>Ford</option><option>Genesis</option><option>GMC</option><option>Honda</option>
-            <option>Hyundai</option><option>Infiniti</option><option>Jaguar</option><option>Jeep</option>
-            <option>Kia</option><option>Lamborghini</option><option>Land Rover</option><option>Lexus</option>
-            <option>Lincoln</option><option>Lucid</option><option>Maserati</option><option>Mazda</option>
-            <option>McLaren</option><option>Mercedes-Benz</option><option>MINI</option><option>Mitsubishi</option>
-            <option>Nissan</option><option>Polestar</option><option>Porsche</option><option>RAM</option>
-            <option>Rivian</option><option>Rolls-Royce</option><option>Subaru</option><option>Tesla</option>
-            <option>Toyota</option><option>Volkswagen</option><option>Volvo</option><option>Other</option>
-          </select>
-        </div>
-        <div><div class="field-label">Model</div><input id="m-model" placeholder="e.g. Camry"/></div>
-        <div><div class="field-label">Color</div>
-          <select id="m-color">
-            <option value="">— Select —</option>
-            <option>Black</option><option>White</option><option>Silver</option><option>Gray</option>
-            <option>Red</option><option>Blue</option><option>Green</option><option>Gold</option>
-            <option>Beige</option><option>Brown</option><option>Orange</option><option>Yellow</option>
-            <option>Purple</option><option>Other</option>
-          </select>
-        </div>
-        <div><div class="field-label">License Plate</div><input id="m-plate" placeholder="ABC 1234" style="text-transform:uppercase;letter-spacing:0.1em"/></div>
-        <div><div class="field-label">Ticket #</div><input id="m-ticket" placeholder="002266"/></div>
-        <div><div class="field-label">Location</div><input id="m-location" placeholder="Spot / level"/></div>
-        <div><div class="field-label">Date &amp; Time In</div><input id="m-timein" readonly style="opacity:0.5;cursor:not-allowed;"/></div>
-        <div class="field-full"><div class="field-label">Notes</div><input id="m-notes" placeholder="Additional notes"/></div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-discard" onclick="closeModalBtn()">Cancel</button>
+      <button class="btn-discard" onclick="closeModal()">Cancel</button>
       <button class="btn-save" onclick="saveModal()">✓ Save Changes</button>
     </div>
   </div>
 </div>
 
 <script>
-const BACKEND = "";
 const COLOR_MAP = {Black:"#1a1a1a",White:"#ebebeb",Silver:"#c0c0c0",Gray:"#888",Red:"#cc3322",Blue:"#2266ee",Green:"#229944",Gold:"#ccaa00",Beige:"#c9b89a",Brown:"#8b5e3c",Orange:"#ff7700",Yellow:"#ffdd00",Purple:"#9933ff",Other:"#555"};
-
 let imgBase64 = null;
 let stream = null;
 let tickets = [];
+let modalIndex = -1;
 
 function showStatus(msg, type) {
   const w = document.getElementById("status-wrap");
   w.innerHTML = `<div class="status ${type}">${type==="err"?"⚠":"✓"} ${msg}</div>`;
   if (type === "ok") setTimeout(() => w.innerHTML = "", 3000);
 }
-
 function clearStatus() { document.getElementById("status-wrap").innerHTML = ""; }
 
-// File upload
 document.getElementById("file-input").addEventListener("change", e => loadFile(e.target.files[0]));
 const dz = document.getElementById("drop-zone");
 dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("drag"); });
@@ -415,7 +343,6 @@ function clearImage() {
   clearStatus();
 }
 
-// Camera
 async function toggleCamera() {
   if (stream) { stopCamera(); return; }
   try {
@@ -448,16 +375,14 @@ function capturePhoto() {
   stopCamera();
 }
 
-// Scan
 async function scanTicket() {
   if (!imgBase64) { showStatus("Please add a ticket photo first.", "err"); return; }
   const btn = document.getElementById("scan-btn");
   btn.className = "scan-btn";
   btn.innerHTML = '<span class="spinner"></span> Reading Ticket…';
-  clearStatus();
-
+  showStatus("Contacting server...", "ok");
   try {
-    showStatus("Contacting server...", "ok");
+    try { await fetch("/", { signal: AbortSignal.timeout(8000) }); } catch {}
     const res = await fetch("/scan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -507,10 +432,10 @@ function saveTicket() {
     make: document.getElementById("f-make").value,
     model: document.getElementById("f-model").value,
     color: document.getElementById("f-color").value,
-    licensePlate: document.getElementById("f-plate").value,
+    licensePlate: document.getElementById("f-plate").value.toUpperCase(),
     location: document.getElementById("f-location").value,
-    notes: document.getElementById("f-notes").value,
     timeIn: document.getElementById("f-timein").value,
+    notes: document.getElementById("f-notes").value,
     at: new Date().toLocaleTimeString()
   };
   tickets.unshift(t);
@@ -528,9 +453,9 @@ function updateBadge() {
 function updateLocationFilter() {
   const sel = document.getElementById("filter-location");
   const current = sel.value;
-  const locations = [...new Set(tickets.map(t => t.location).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="">All Locations</option>' + locations.map(l => `<option>${l}</option>`).join("");
-  if (locations.includes(current)) sel.value = current;
+  const locs = [...new Set(tickets.map(t => t.location).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All Locations</option>' + locs.map(l => `<option>${l}</option>`).join("");
+  if (locs.includes(current)) sel.value = current;
 }
 
 function updateDateFilter() {
@@ -567,11 +492,11 @@ function renderLog() {
   const sortBy = document.getElementById("sort-by")?.value || "newest";
 
   let filtered = tickets.filter(t => {
-    const matchSearch = !q || [t.guestName, t.licensePlate, t.make, t.model, t.ticketNumber, t.color, t.location].some(v => (v||"").toLowerCase().includes(q));
+    const matchSearch = !q || [t.guestName,t.licensePlate,t.make,t.model,t.ticketNumber,t.color,t.location].some(v => (v||"").toLowerCase().includes(q));
     const matchMake = !fMake || t.make === fMake;
     const matchColor = !fColor || t.color === fColor;
     const matchLocation = !fLocation || t.location === fLocation;
-    const matchDate = !fDate || (t.timeIn || "").startsWith(fDate);
+    const matchDate = !fDate || (t.timeIn||"").startsWith(fDate);
     return matchSearch && matchMake && matchColor && matchLocation && matchDate;
   });
 
@@ -579,24 +504,25 @@ function renderLog() {
     if (sortBy === "oldest") return tickets.indexOf(b) - tickets.indexOf(a);
     if (sortBy === "name") return (a.guestName||"").localeCompare(b.guestName||"");
     if (sortBy === "ticket") return (a.ticketNumber||"").localeCompare(b.ticketNumber||"");
-    return tickets.indexOf(a) - tickets.indexOf(b); // newest
+    return tickets.indexOf(a) - tickets.indexOf(b);
   });
 
-  document.getElementById("log-title").textContent = q || fMake || fColor || fLocation || fDate
+  document.getElementById("log-title").textContent = (q||fMake||fColor||fLocation||fDate)
     ? filtered.length + " of " + tickets.length + " tickets"
     : "Ticket Log — " + tickets.length + " total";
 
-  rows.innerHTML = filtered.map((t) => { const i = tickets.indexOf(t); return `
-    <div class="ticket-row" onclick="openModal(i)">
+  rows.innerHTML = filtered.map(t => {
+    const i = tickets.indexOf(t);
+    return `<div class="ticket-row" onclick="openModal(${i})">
       <span class="ticket-num-col">#${t.ticketNumber||"—"}</span>
       <div class="ticket-info">
         <div class="ticket-main">${t.guestName||"Guest"} · ${[t.make,t.model].filter(Boolean).join(" ")||"Unknown"}</div>
         <div class="ticket-sub">${t.licensePlate||"No plate"} · ${t.color||"—"} · ${t.timeIn||t.at}</div>
       </div>
       <div class="color-dot" style="background:${COLOR_MAP[t.color]||"#444"}"></div>
-      <button class="del-btn" onclick="deleteTicket(${i})">✕</button>
-    </div>
-  `; }).join("");
+      <button class="del-btn" onclick="event.stopPropagation();deleteTicket(${i})">✕</button>
+    </div>`;
+  }).join("");
 }
 
 function deleteTicket(i) {
@@ -617,33 +543,31 @@ function exportCSV() {
   a.click();
 }
 
-let modalIndex = -1;
-
 function openModal(i) {
   modalIndex = i;
   const t = tickets[i];
-  document.getElementById("modal-title").textContent = "Ticket #" + (t.ticketNumber || "—");
-  document.getElementById("m-name").value = t.guestName || "";
-  document.getElementById("m-make").value = t.make || "";
-  document.getElementById("m-model").value = t.model || "";
-  document.getElementById("m-color").value = t.color || "";
-  document.getElementById("m-plate").value = t.licensePlate || "";
-  document.getElementById("m-ticket").value = t.ticketNumber || "";
-  document.getElementById("m-location").value = t.location || "";
-  document.getElementById("m-timein").value = t.timeIn || "";
-  document.getElementById("m-notes").value = t.notes || "";
+  document.getElementById("modal-title").textContent = "Ticket #" + (t.ticketNumber||"—");
+  document.getElementById("m-name").value = t.guestName||"";
+  document.getElementById("m-make").value = t.make||"";
+  document.getElementById("m-model").value = t.model||"";
+  document.getElementById("m-color").value = t.color||"";
+  document.getElementById("m-plate").value = t.licensePlate||"";
+  document.getElementById("m-ticket").value = t.ticketNumber||"";
+  document.getElementById("m-location").value = t.location||"";
+  document.getElementById("m-timein").value = t.timeIn||"";
+  document.getElementById("m-notes").value = t.notes||"";
   document.getElementById("modal-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
 }
 
-function closeModalBtn() {
+function closeModal() {
   document.getElementById("modal-overlay").classList.remove("open");
   document.body.style.overflow = "";
   modalIndex = -1;
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById("modal-overlay")) closeModalBtn();
+function closeModalOutside(e) {
+  if (e.target === document.getElementById("modal-overlay")) closeModal();
 }
 
 function saveModal() {
@@ -659,55 +583,7 @@ function saveModal() {
     location: document.getElementById("m-location").value,
     notes: document.getElementById("m-notes").value,
   };
-  closeModalBtn();
-  updateBadge();
-  renderLog();
-  showStatus("Ticket updated.", "ok");
-}
-
-let modalIndex = -1;
-
-function openModal(i) {
-  modalIndex = i;
-  const t = tickets[i];
-  document.getElementById("modal-title").textContent = "Ticket #" + (t.ticketNumber || "—");
-  document.getElementById("m-name").value = t.guestName || "";
-  document.getElementById("m-make").value = t.make || "";
-  document.getElementById("m-model").value = t.model || "";
-  document.getElementById("m-color").value = t.color || "";
-  document.getElementById("m-plate").value = t.licensePlate || "";
-  document.getElementById("m-ticket").value = t.ticketNumber || "";
-  document.getElementById("m-location").value = t.location || "";
-  document.getElementById("m-timein").value = t.timeIn || "";
-  document.getElementById("m-notes").value = t.notes || "";
-  document.getElementById("modal-overlay").classList.add("open");
-  document.body.style.overflow = "hidden";
-}
-
-function closeModalBtn() {
-  document.getElementById("modal-overlay").classList.remove("open");
-  document.body.style.overflow = "";
-  modalIndex = -1;
-}
-
-function closeModal(e) {
-  if (e.target === document.getElementById("modal-overlay")) closeModalBtn();
-}
-
-function saveModal() {
-  if (modalIndex === -1) return;
-  tickets[modalIndex] = {
-    ...tickets[modalIndex],
-    guestName: document.getElementById("m-name").value,
-    make: document.getElementById("m-make").value,
-    model: document.getElementById("m-model").value,
-    color: document.getElementById("m-color").value,
-    licensePlate: document.getElementById("m-plate").value.toUpperCase(),
-    ticketNumber: document.getElementById("m-ticket").value,
-    location: document.getElementById("m-location").value,
-    notes: document.getElementById("m-notes").value,
-  };
-  closeModalBtn();
+  closeModal();
   updateBadge();
   renderLog();
   showStatus("Ticket updated.", "ok");
