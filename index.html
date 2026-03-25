@@ -86,6 +86,16 @@
   .search-input { width:100%; background:#08080f; border:1px solid #252535; border-radius:8px; padding:9px 12px; color:#eeeef5; font-size:12px; font-family:inherit; outline:none; }
   .search-input:focus { border-color:#f5a623; box-shadow:0 0 0 3px #f5a62318; }
   .del-btn { width:26px; height:26px; border-radius:6px; background:transparent; border:1px solid #252535; color:#444460; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .modal-overlay { display:none; position:fixed; inset:0; background:#000a; z-index:100; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#10101a; border:1px solid #1e1e2e; border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; animation:up 0.25s ease; }
+  .modal-header { padding:16px 20px; border-bottom:1px solid #1e1e2e; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#10101a; z-index:10; }
+  .modal-title { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#f5a623; font-weight:700; }
+  .modal-close { width:30px; height:30px; border-radius:50%; background:transparent; border:1px solid #252535; color:#eeeef5; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .modal-body { padding:20px; }
+  .modal-actions { display:flex; gap:10px; margin-top:18px; padding:0 20px 20px; }
+  .ticket-row { cursor:pointer; transition:background 0.15s; }
+  .ticket-row:hover { background:#14141e; }
 </style>
 </head>
 <body>
@@ -228,6 +238,56 @@
   <div id="log-rows"></div>
   </div>
 </main>
+
+<!-- Ticket Detail Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Ticket Detail</span>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-grid">
+        <div class="field-full"><div class="field-label">Guest Name</div><input id="m-name" placeholder="Guest name"/></div>
+        <div><div class="field-label">Make</div>
+          <select id="m-make">
+            <option value="">— Select —</option>
+            <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option><option>Audi</option>
+            <option>Bentley</option><option>BMW</option><option>Buick</option><option>Cadillac</option>
+            <option>Chevrolet</option><option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
+            <option>Ford</option><option>Genesis</option><option>GMC</option><option>Honda</option>
+            <option>Hyundai</option><option>Infiniti</option><option>Jaguar</option><option>Jeep</option>
+            <option>Kia</option><option>Lamborghini</option><option>Land Rover</option><option>Lexus</option>
+            <option>Lincoln</option><option>Lucid</option><option>Maserati</option><option>Mazda</option>
+            <option>McLaren</option><option>Mercedes-Benz</option><option>MINI</option><option>Mitsubishi</option>
+            <option>Nissan</option><option>Polestar</option><option>Porsche</option><option>RAM</option>
+            <option>Rivian</option><option>Rolls-Royce</option><option>Subaru</option><option>Tesla</option>
+            <option>Toyota</option><option>Volkswagen</option><option>Volvo</option><option>Other</option>
+          </select>
+        </div>
+        <div><div class="field-label">Model</div><input id="m-model" placeholder="e.g. Camry"/></div>
+        <div><div class="field-label">Color</div>
+          <select id="m-color">
+            <option value="">— Select —</option>
+            <option>Black</option><option>White</option><option>Silver</option><option>Gray</option>
+            <option>Red</option><option>Blue</option><option>Green</option><option>Gold</option>
+            <option>Beige</option><option>Brown</option><option>Orange</option><option>Yellow</option>
+            <option>Purple</option><option>Other</option>
+          </select>
+        </div>
+        <div><div class="field-label">License Plate</div><input id="m-plate" placeholder="ABC 1234" style="text-transform:uppercase;letter-spacing:0.1em"/></div>
+        <div><div class="field-label">Ticket #</div><input id="m-ticket" placeholder="002266"/></div>
+        <div><div class="field-label">Location</div><input id="m-location" placeholder="Spot / level"/></div>
+        <div><div class="field-label">Date &amp; Time In</div><input id="m-timein" readonly style="opacity:0.5;cursor:not-allowed;"/></div>
+        <div class="field-full"><div class="field-label">Notes</div><input id="m-notes" placeholder="Additional notes"/></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-discard" onclick="closeModalBtn()">Cancel</button>
+      <button class="btn-save" onclick="saveModal()">✓ Save Changes</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const BACKEND = "";
@@ -467,7 +527,7 @@ function renderLog() {
     : "Ticket Log — " + tickets.length + " total";
 
   rows.innerHTML = filtered.map((t) => { const i = tickets.indexOf(t); return `
-    <div class="ticket-row">
+    <div class="ticket-row" onclick="openModal(i)">
       <span class="ticket-num-col">#${t.ticketNumber||"—"}</span>
       <div class="ticket-info">
         <div class="ticket-main">${t.guestName||"Guest"} · ${[t.make,t.model].filter(Boolean).join(" ")||"Unknown"}</div>
@@ -495,6 +555,54 @@ function exportCSV() {
   a.href = URL.createObjectURL(new Blob([[h.join(","),...rows].join("\n")],{type:"text/csv"}));
   a.download = "valet-" + new Date().toLocaleDateString().replace(/\//g,"-") + ".csv";
   a.click();
+}
+
+let modalIndex = -1;
+
+function openModal(i) {
+  modalIndex = i;
+  const t = tickets[i];
+  document.getElementById("modal-title").textContent = "Ticket #" + (t.ticketNumber || "—");
+  document.getElementById("m-name").value = t.guestName || "";
+  document.getElementById("m-make").value = t.make || "";
+  document.getElementById("m-model").value = t.model || "";
+  document.getElementById("m-color").value = t.color || "";
+  document.getElementById("m-plate").value = t.licensePlate || "";
+  document.getElementById("m-ticket").value = t.ticketNumber || "";
+  document.getElementById("m-location").value = t.location || "";
+  document.getElementById("m-timein").value = t.timeIn || "";
+  document.getElementById("m-notes").value = t.notes || "";
+  document.getElementById("modal-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModalBtn() {
+  document.getElementById("modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+  modalIndex = -1;
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modal-overlay")) closeModalBtn();
+}
+
+function saveModal() {
+  if (modalIndex === -1) return;
+  tickets[modalIndex] = {
+    ...tickets[modalIndex],
+    guestName: document.getElementById("m-name").value,
+    make: document.getElementById("m-make").value,
+    model: document.getElementById("m-model").value,
+    color: document.getElementById("m-color").value,
+    licensePlate: document.getElementById("m-plate").value.toUpperCase(),
+    ticketNumber: document.getElementById("m-ticket").value,
+    location: document.getElementById("m-location").value,
+    notes: document.getElementById("m-notes").value,
+  };
+  closeModalBtn();
+  updateBadge();
+  renderLog();
+  showStatus("Ticket updated.", "ok");
 }
 </script>
 </body>
